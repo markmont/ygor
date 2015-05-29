@@ -1,0 +1,34 @@
+{
+  "name": "Ygor",
+  "productName": "Ygor",
+  "version": "0.1.2",
+  "identifier": "edu.umich.Ygor",
+  "description": "Ygor research assistant for HPC clusters.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hpc",
+    "cluster",
+    "torque",
+    "moab",
+    "maui",
+    "slurm",
+    "beowulf",
+    "pbs",
+    "starcluster",
+    "sge"
+  ],
+  "author": "University of Michigan",
+  "license": "GPL3",
+  "dependencies": {
+    "fs-jetpack": "^0.6.4",
+    "jquery": "^2.1.4",
+    "jquery-ui": "^1.10.5",
+    "ssh2": "^0.4.8"
+  },
+  "config": {
+    "target": "development"
+  }
+}

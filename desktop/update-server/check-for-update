@@ -1,0 +1,93 @@
+#!/usr/bin/perl -Tw
+#
+# TODO: rewrite this in JavaScript (node.js) and do everything right
+#
+
+use strict;
+use warnings;
+
+use CGI;
+use POSIX 'strftime';
+
+sub send_headers {
+    my $status = $_[0];
+    print "Status: $status\n";
+    print "Cache-Control: no-cache, must-revalidate, max-age=0\n";
+    print "Expires: Wed, 11 Jan 1984 05:00:00 GMT\n";
+    print "Pragma: no-cache\n";
+    print "Content-type: application/json\n";
+    print "\n";
+    return;
+}
+
+sub fatal_error {
+    my $message = $_[0];
+    print STDERR "ERROR: $message\n";
+    send_headers( "204 No Content" );
+    exit( 0 );
+}
+
+my $q = CGI->new;
+
+my $version = $q->param('version') || 'unknown';
+if ( $version !~ /^((\d*\.?)+(-[0-9A-Za-z\.\-]+)?)(\+[0-9A-Za-z\.\-]+)?$/ ) {
+    fatal_error( "Bad version" );
+}
+$version = $1; # untaint
+if ( $version !~ /^(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z\.\-]+)?/ ) {
+    fatal_error( "Bad version redux" );
+}
+my %version_info = ( 'major' => $1, 'minor' => $2, 'patch' => $3, 'other' => $4 || '' );
+
+my $platform = $q->param('platform') || 'unknown';
+$platform =~ /^([a-z]+)$/;
+$platform = $1 || 'unknown'; # untaint
+if ( $platform ne 'darwin' ) {
+    fatal_error( "Bad platform" );
+}
+
+my $updates_dir = "/var/www/miflux.lsa.umich.edu/html-ssl/${platform}/updates";
+if ( ! opendir( DIR, $updates_dir ) ) {
+    fatal_error( "Bad directory: $!" );
+}
+my @upgrades = grep { /^Ygor-.*\.zip$/ } readdir( DIR );
+closedir( DIR );
+
+my $latest_version = '0.0.0';
+my %latest = ( 'major' => 0, 'minor' => 0, 'patch' => 0, 'other' => '' );
+for my $u (@upgrades) {
+    next unless $u =~ /^Ygor-(.+)\.zip$/;
+    my $v = $1;
+    next unless $v =~ /^(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z\.\-]+)?$/;
+    my %upgrade = ( 'major' => $1, 'minor' => $2, 'patch' => $3, 'other' => $4 || '' );
+    if ( $upgrade{'major'} > $latest{'major'}
+        || ($upgrade{'major'} == $latest{'major'} && $upgrade{'minor'} > $latest{'minor'})
+        || ($upgrade{'major'} == $latest{'major'} && $upgrade{'minor'} == $latest{'minor'} && $upgrade{'patch'} > $latest{'patch'})
+        || ($upgrade{'major'} == $latest{'major'} && $upgrade{'minor'} == $latest{'minor'} && $upgrade{'patch'} == $latest{'patch'} && $upgrade{'other'} gt $latest{'other'})
+    ) {
+        $latest_version = $v;
+        %latest = %upgrade;
+   }
+}
+if ( $latest_version eq '0.0.0' ) {
+    fatal_error( "no upgrades found" );
+}
+
+if ( $latest{'major'} > $version_info{'major'}
+    || ($latest{'major'} == $version_info{'major'} && $latest{'minor'} > $version_info{'minor'})
+    || ($latest{'major'} == $version_info{'major'} && $latest{'minor'} == $version_info{'minor'} && $latest{'patch'} > $version_info{'patch'})
+    || ($latest{'major'} == $version_info{'major'} && $latest{'minor'} == $version_info{'minor'} && $latest{'patch'} == $version_info{'patch'} && $latest{'other'} gt $version_info{'other'})
+) {
+    send_headers( "200 OK" );
+    my $date = strftime '%Y-%m-%d', localtime;
+    # TODO: get name,notes,pub_date from a metadata file (.json or .yaml)
+    print <<__END__
+{"url":"https://miflux.lsa.umich.edu/${platform}/updates/Ygor-${latest_version}.zip","name":"Ygor ${latest_version}","notes":"Ygor ${latest_version} is now available","pub_date":"${date}T00:00:00+00:00","version":"${latest_version}"}
+__END__
+;
+    exit( 0 );
+}
+
+send_headers( "204 No Content" );
+exit( 0 );
+

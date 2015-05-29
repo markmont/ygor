@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Ygor</title>
+
+    <link href="./stylesheets/main.css" rel="stylesheet" type="text/css">
+    <link href="./node_modules/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
+
+    <script src="vendor/electron_boilerplate/env_config.js"></script>
+    <script src="vendor/electron_boilerplate/context_menu.js"></script>
+    <script src="vendor/electron_boilerplate/external_links.js"></script>
+
+    <script src="vendor/require.js"></script>
+    <script>
+        requirejs(['app'], function (app) {});
+    </script>
+
+</head>
+
+<body>
+
+    <p>
+        Ygor <span id="ygor-version">unknown</span>, using io.js <script>document.write(process.version)</script>
+        and Electron <script>document.write(process.versions['electron'])</script>.
+    </p>
+    <div id="dialog">
+        <input id="dialog-response" type="password" name="response" />
+    </div>
+    <br />
+    <form name="login-form">
+        <label>Uniqname <input id="login-username" type="text" name="username"/></label>
+    </form>
+    <br />
+    <button id="login-button">Connect</button>
+    <br /><br />
+    <button id="command1-button">Run "ls -l"</button>
+    <button id="command2-button">Run "who"</button>
+    <br />
+    <div>
+      <pre id="debug-output"></pre>
+    </div>
+
+</body>
+</html>
