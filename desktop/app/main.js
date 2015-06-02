@@ -5,6 +5,7 @@ var BrowserWindow = require('browser-window');
 var autoUpdater = require('auto-updater');
 var ipc = require('ipc');
 var env = require('./vendor/electron_boilerplate/env_config');
+var devHelper = require('./vendor/electron_boilerplate/dev_helper');
 var windowStateKeeper = require('./vendor/electron_boilerplate/window_state');
 
 // Report crashes to our server.
@@ -40,6 +41,11 @@ app.on('ready', function () {
     }
 
     mainWindow.loadUrl('file://' + __dirname + '/app.html');
+
+    if (env.name === 'development') {
+        devHelper.setDevMenu();
+        mainWindow.openDevTools();
+    }
 
     mainWindow.on('close', function () {
         mainWindowState.saveState(mainWindow);
