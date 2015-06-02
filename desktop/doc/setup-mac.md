@@ -143,7 +143,6 @@ Instead, we're currently using [electron-boilerplate](https://github.com/szwacz/
 ```bash
 cd /opt/ygor/desktop/toolchain/src
 git clone https://github.com/markmont/electron-boilerplate.git
-#git clone git@github.com:markmont/electron-boilerplate.git
 ```
 
 

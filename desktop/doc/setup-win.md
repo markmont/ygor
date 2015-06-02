@@ -160,6 +160,8 @@ https://github.com/atom/electron/issues/1140
 
 ## Building the Ygor application
 
+To get the Ygor code:
+
 ```powershell
 cd $HOME
 git clone https://github.com/markmont/ygor.git

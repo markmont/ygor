@@ -5,8 +5,11 @@
   * Get auto-update working on Mac
     * https://github.com/atom/electron/blob/master/docs/api/auto-updater.md
     * post to stackoverflow about gulp-vinyl-zip problem: https://stackoverflow.com/questions/30521106/typeerror-when-creating-zip-file-with-gulp-vinyl-zip
-    * make dmg read-only after creation to avoid breaking code signatures
   * Get auto-update working on Windows
+    * codesign
+      * https://stackoverflow.com/questions/3580349/code-signing-microsoft-authenticode
+      * http://www.tech-pro.net/code-signing-for-developers.html
+      * http://www.codeproject.com/Articles/325833/Basics-of-Signing-and-Verifying-code
     * There are problems, see https://github.com/atom/electron/issues/939
     * it apparently works under grunt-electron-installer, see
       * https://github.com/atom/electron/issues/1479
@@ -17,7 +20,6 @@
     * Get version to show up in Finder Command-I
     * Submit codesign functionality to electron-boilerplate
   * Windows packaging
-    * codesign
     * when uninstalling, remove shortcut from Start menu
     * see if most installed files can be in a subdirectory (for neatness)
 
