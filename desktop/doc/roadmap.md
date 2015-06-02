@@ -17,7 +17,6 @@
 
   * Mac packaging
     https://github.com/atom/electron/blob/master/docs/tutorial/application-distribution.md
-    * Get version to show up in Finder Command-I
     * Submit codesign functionality to electron-boilerplate
   * Windows packaging
     * when uninstalling, remove shortcut from Start menu
