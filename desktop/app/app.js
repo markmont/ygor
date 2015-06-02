@@ -128,15 +128,4 @@ $(document).ready(function() {
     $('#ygor-version').text(packageJson.version);
     $('#login-username').val(process.env['USER']);
 
-    // F12 toggles dev tools, F5 reloads
-    if ( window.env.name == 'development' ) {
-        $(document).keydown(function (e) {
-            if (e.which === 123) {
-                remote.getCurrentWindow().toggleDevTools();
-            } else if (e.which === 116) {
-                location.reload();
-            }
-        });
-    }
-
 }); // $(document).ready()
