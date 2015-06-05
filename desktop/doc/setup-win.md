@@ -167,9 +167,19 @@ cd $HOME
 git clone https://github.com/markmont/ygor.git
 ```
 
+To clean everything:
+
+```powershell
+cd $HOME\ygor\desktop
+# Needs to be run twice to get everything:
+cmd /c "rd /s /q node_modules app\node_modules build releases tmp"
+cmd /c "rd /s /q node_modules app\node_modules build releases tmp"
+```
+
+
 To install dependencies after cloning or cleaning:
 
-```bash
+```powershell
 cd $HOME\ygor\desktop
 npm install
 ```
@@ -187,4 +197,18 @@ npm start
 cd $HOME\ygor\desktop
 npm run release
 ```
+
+## Code signing
+
+Start Menu -> All Programs -> Visual Studio 2013 -> Visual Studio Tools -> Developer Command Prompt for VS2013
+
+
+```batch
+cd \ygor\desktop\releases
+signtool verify /v /pa Ygor_0.1.2.exe
+signtool.exe sign /f umcodesign.pfx /p "password goes here" /t http://timestamp.comodoca.com/authenticode Ygor_0.1.2.exe
+signtool verify /v /pa Ygor_0.1.2.exe
+```
+
+see https://msdn.microsoft.com/en-us/library/8s9b9yaz%28v=vs.110%29.aspx
 
