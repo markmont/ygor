@@ -79,7 +79,7 @@ var sign = function () {
 
     var signingInfo = projectDir.read('resources/osx/sign.json', 'json');
     if (! signingInfo) {
-        gulpUtil.log('Skipping code signing (file resources/osx/identity does not exist)');
+        gulpUtil.log('Skipping code signing (file resources/osx/sign.json does not exist)');
         return Q();
     }
     var identity = signingInfo['identity'];
