@@ -96,9 +96,12 @@ Run the following commands:
 ```bash
 openssl pkcs12 -in ygor-signing-identity.p12 -out ygor-signing-identity.pem -clcerts -nokeys
 openssl x509 -in ygor-signing-identity.pem -noout -text
-openssl x509 -in ygor-signing-identity.pem -noout -text | perl -n -e '/UID=([^,]+)/ && print "$1\n";' > ygor-signing-identity
-cat ygor-signing-identity
-chmod 600 ygor-signing-identity*
+openssl x509 -in ygor-signing-identity.pem -noout -text | perl -n -e '/UID=([^,]+)/ && print "{ \"identity\": \"$1\" }\n";' > sign.json
+cat sign.json
+chmod 600 ygor-signing-identity* sign.json
+cd /opt/ygor/desktop/resources/osx
+rm -f sign.json
+ln -s ~/ygor-signing-identity/sign.json
 ```
 
   * In the XCode project, go to Build Settings -> Code Signing

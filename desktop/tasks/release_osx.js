@@ -66,15 +66,23 @@ var finalize = function () {
 var sign = function () {
     var deferred = Q.defer();
 
-    // The identity file should contain a single line of text that is the UID
-    // of the Apple code signing certificate stored in the Keychain that should
-    // be used to sign the code.  It will look something like WXYZAAPQRS
-    var identity = projectDir.read('resources/osx/identity', 'utf8');
-    if (! identity) {
+    // To enable code signing, create a file resources/osx/sign.json
+    // containing an item, identity, whose value is the UID of the Apple
+    // code signing certificate stored in the Keychain that should
+    // be used to sign the code.  The UID will look something like WXYZAAPQRS
+    //
+    // Example:
+    //
+    // {
+    //   "identity": "WXYZAAPQRS"
+    // }
+
+    var signingInfo = projectDir.read('resources/osx/sign.json', 'json');
+    if (! signingInfo) {
         gulpUtil.log('Skipping code signing (file resources/osx/identity does not exist)');
         return Q();
     }
-    identity = identity.trim();
+    var identity = signingInfo['identity'];
     gulpUtil.log('Signing code using identity \'' + identity + '\'...');
 
     var frameworks = [

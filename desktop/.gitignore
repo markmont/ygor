@@ -2,5 +2,7 @@ app/node_modules
 build
 node_modules
 releases
+resources/osx/sign.json
+resources/windows/sign.json
 tmp
 toolchain
