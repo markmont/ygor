@@ -4,13 +4,13 @@ var Q = require('q');
 var gulpUtil = require('gulp-util');
 var childProcess = require('child_process');
 var jetpack = require('fs-jetpack');
+var asar = require('asar');
 var utils = require('./utils');
 
 var projectDir;
 var tmpDir;
 var releasesDir;
 var readyAppDir;
-var codeDir;
 var manifest;
 
 var init = function () {
@@ -19,7 +19,6 @@ var init = function () {
     releasesDir = projectDir.dir('./releases');
     manifest = projectDir.read('app/package.json', 'json');
     readyAppDir = tmpDir.cwd(manifest.name);
-    codeDir = readyAppDir.cwd('resources/app');
 
     return Q();
 };
@@ -28,8 +27,14 @@ var copyRuntime = function () {
     return projectDir.copyAsync('node_modules/electron-prebuilt/dist', readyAppDir.path(), { overwrite: true });
 };
 
-var copyBuiltApp = function () {
-    return projectDir.copyAsync('build', codeDir.path(), { overwrite: true });
+var packageBuiltApp = function () {
+    var deferred = Q.defer();
+
+    asar.createPackage(projectDir.path('build'), readyAppDir.path('resources/app.asar'), function() {
+        deferred.resolve();
+    });
+
+    return deferred.promise;
 };
 
 var finalize = function () {
@@ -53,7 +58,7 @@ var finalize = function () {
 var createInstaller = function () {
     var deferred = Q.defer();
 
-    var finalPackageName = manifest.name + '_' + manifest.version + '.exe';
+    var finalPackageName = manifest.name + '-' + manifest.version + '.exe';
     var installScript = projectDir.read('resources/windows/installer.nsi');
     installScript = utils.replace(installScript, {
         name: manifest.name,
@@ -93,8 +98,8 @@ var cleanClutter = function () {
 module.exports = function () {
     return init()
     .then(copyRuntime)
-    .then(copyBuiltApp)
+    .then(packageBuiltApp)
     .then(finalize)
-    .then(createInstaller)
-    .then(cleanClutter);
+    .then(createInstaller);
+    //.then(cleanClutter);
 };

@@ -6,6 +6,7 @@ var gulpUtil = require('gulp-util');
 var shell = require('gulp-shell');
 //var zip = require('gulp-vinyl-zip');
 var jetpack = require('fs-jetpack');
+var asar = require('asar');
 var utils = require('./utils');
 
 var projectDir;
@@ -28,8 +29,14 @@ var copyRuntime = function () {
     return projectDir.copyAsync('node_modules/electron-prebuilt/dist/Electron.app', finalAppDir.path());
 };
 
-var copyBuiltApp = function () {
-    return projectDir.copyAsync('build', finalAppDir.path('Contents/Resources/app'));
+var packageBuiltApp = function () {
+    var deferred = Q.defer();
+
+    asar.createPackage(projectDir.path('build'), finalAppDir.path('Contents/Resources/app.asar'), function() {
+        deferred.resolve();
+    });
+
+    return deferred.promise;
 };
 
 var finalize = function () {
@@ -190,7 +197,7 @@ var cleanClutter = function () {
 module.exports = function () {
     return init()
     .then(copyRuntime)
-    .then(copyBuiltApp)
+    .then(packageBuiltApp)
     .then(finalize)
     .then(sign)
 //    .then(packToZipFile)

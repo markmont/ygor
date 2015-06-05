@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "asar": "^0.6.1",
     "electron-prebuilt": "latest",
     "esperanto": "^0.6.17",
     "fs-jetpack": "^0.6.4",

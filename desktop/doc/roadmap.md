@@ -2,7 +2,6 @@
 
 ## Short-term
 
-  * sync electron-boilerplate again
   * codesign Windows installer, binaries
   * Get auto-update working on Mac
     * https://github.com/atom/electron/blob/master/docs/api/auto-updater.md
