@@ -12,6 +12,8 @@ var tmpDir;
 var releasesDir;
 var readyAppDir;
 var manifest;
+var finalPackageName;
+var signingInfo;
 
 var init = function () {
     projectDir = jetpack;
@@ -55,10 +57,68 @@ var finalize = function () {
     return deferred.promise;
 };
 
+var sign = function (filename) {
+    var deferred = Q.defer();
+    gulpUtil.log('Signing ' + filename + ' ...');
+
+    var signtool = childProcess.spawn( signingInfo['signtool'],
+	[ "sign", "/f", signingInfo['certificate'],
+	    "/p", signingInfo['password'],
+	    "/t", signingInfo['timestampService'],
+	    filename ],
+	{ stdio: 'inherit' }
+    );
+
+    signtool.on('close', function () {
+        gulpUtil.log('File signed!', filename);
+        deferred.resolve();
+    });
+
+    return deferred.promise;
+
+};
+
+var signCode = function () {
+
+    var deferred = Q.defer();
+
+    // To enable code signing, copy the file resources/osx/sign.example
+    // to resources/osx/sign.json and edit it to fill in the correct
+    // values for your development environment.
+
+    signingInfo = projectDir.read('resources/windows/sign.json', 'json');
+    if (! signingInfo) {
+        gulpUtil.log('Skipping code signing (file resources/windows/sign.json does not exist)');
+        return Q();
+    }
+    gulpUtil.log('Signing code using certificate ' + signingInfo['certificate'] + ' ...');
+
+    var filesToSign = jetpack.find(readyAppDir.cwd(),
+        { matching: [ '*.exe', '*.dll' ] });
+
+    var result = Q();
+    filesToSign.forEach(function (f) {
+        result = result.then( function() { return sign(f); } );
+    });
+    return result;
+
+};
+
 var createInstaller = function () {
     var deferred = Q.defer();
 
-    var finalPackageName = manifest.name + '-' + manifest.version + '.exe';
+    finalPackageName = manifest.name + '-' + manifest.version + '.exe';
+
+    var signCmd = "echo Not signing the uninstaller";
+    if (signingInfo) {
+        signCmd = "$\\\"" + signingInfo['signtool']
+	    + "$\\\" sign /f $\\\"" + signingInfo['certificate']
+	    + "$\\\" /p $\\\"" + signingInfo['password']
+	    + "$\\\" /t $\\\"" + signingInfo['timestampService']
+	    + "$\\\"";
+    }
+    gulpUtil.log('uninstaller sign: ' + signCmd);
+
     var installScript = projectDir.read('resources/windows/installer.nsi');
     installScript = utils.replace(installScript, {
         name: manifest.name,
@@ -69,6 +129,8 @@ var createInstaller = function () {
         icon: readyAppDir.path('icon.ico'),
         setupIcon: projectDir.path('resources/windows/setup-icon.ico'),
         banner: projectDir.path('resources/windows/setup-banner.bmp'),
+        tmpDir: tmpDir.path(),
+	signCmd: signCmd,
     });
     tmpDir.write('installer.nsi', installScript);
 
@@ -91,6 +153,13 @@ var createInstaller = function () {
     return deferred.promise;
 };
 
+var signInstaller = function () {
+    if (!signingInfo) {
+        return Q();
+    }
+    return sign(releasesDir.path(finalPackageName));
+};
+
 var cleanClutter = function () {
     return tmpDir.removeAsync('.');
 };
@@ -100,6 +169,8 @@ module.exports = function () {
     .then(copyRuntime)
     .then(packageBuiltApp)
     .then(finalize)
-    .then(createInstaller);
-    //.then(cleanClutter);
+    .then(signCode)
+    .then(createInstaller)
+    .then(signInstaller)
+    .then(cleanClutter);
 };

@@ -16,6 +16,7 @@
 !define icon "{{icon}}"
 !define setupIcon "{{setupIcon}}"
 !define banner "{{banner}}"
+!define tmpDir "{{tmpDir}}"
 
 !define exec "electron.exe"
 
@@ -28,11 +29,30 @@
 ; Installation
 ; --------------------------------
 
-SetCompressor lzma
+!ifdef INNER
+    !echo "Creating uninstaller"
+    OutFile "${tmpDir}\tempinstaller.exe"
+    SetCompress off ; for speed
+!else
+    ; Call makensis again, defining INNER to create an installer containing
+    ; just the uninstaller.
+    !system "$\"${NSISDIR}\makensis$\" /DINNER $\"${tmpDir}\installer.nsi$\"" = 0
+
+    ; Run the installer to get the actual uninstaller.  Since it just calls
+    ; quit the return value isn't zero.
+    ;!system "{{signCmd}} $\"${tmpDir}\tempinstaller.exe$\"" = 0
+    !system "$\"${tmpDir}\tempinstaller.exe$\"" = 2
+
+    ; Sign the uninstaller.
+    !system "{{signCmd}} $\"${tmpDir}\${uninstaller}$\"" = 0
+
+    ; Now create the real installer...
+    OutFile "${dest}"
+    SetCompressor lzma
+!endif
 
 Name "${productName}"
 Icon "${setupIcon}"
-OutFile "${dest}"
 InstallDir "$PROGRAMFILES\${productName}"
 InstallDirRegKey HKLM "${regkey}" ""
 
@@ -56,6 +76,12 @@ Var Image
 Var ImageHandle
 
 Function .onInit
+
+!ifdef INNER
+    ; If INNER is defined, just write the installer containing the uninstaller.
+    WriteUninstaller "${tmpDir}\${uninstaller}"
+    Quit
+!endif
 
     ; Extract banner image for welcome page
     InitPluginsDir
@@ -97,16 +123,21 @@ Section "Install"
     ; Include all files from /build directory
     File /r "${src}\*"
 
+!ifndef INNER
+    ; Include the signed uninstaller
+    File "${tmpDir}\${uninstaller}"
+!endif
+
     ; Create start menu shortcut
     CreateShortCut "$SMPROGRAMS\${productName}.lnk" "$INSTDIR\${exec}" "" "$INSTDIR\icon.ico"
-
-    WriteUninstaller "${uninstaller}"
 
 SectionEnd
 
 ; --------------------------------
 ; Uninstaller
 ; --------------------------------
+
+!ifdef INNER  ; only when creating the uninstaller
 
 ShowUninstDetails nevershow
 
@@ -158,3 +189,6 @@ Section "Uninstall"
     ${EndIf}
 
 SectionEnd
+
+!endif
+
