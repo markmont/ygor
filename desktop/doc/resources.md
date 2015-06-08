@@ -20,6 +20,11 @@ Example applications
 
   * [Kitematic](https://github.com/kitematic/kitematic)
 
+## Microsoft Windows
+
+  * [Signing and checking code with Authenticode](https://msdn.microsoft.com/en-us/library/ms537364%28v=vs.85%29.aspx)
+  * [SignTool documentation](https://msdn.microsoft.com/en-us/library/8s9b9yaz%28v=vs.110%29.aspx)
+
 
 ## Other
 

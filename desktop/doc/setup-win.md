@@ -158,14 +158,23 @@ Note if you run the test without -R ("release") three "runas" tests will fail --
 https://github.com/atom/electron/issues/1140
 
 
-## Building the Ygor application
+## Ygor code
 
-To get the Ygor code:
+Get the Ygor code from GitHub.
 
 ```powershell
 cd $HOME
 git clone https://github.com/markmont/ygor.git
+cd ygor\desktop\resources\windows
+copy sign.example sign.json
 ```
+
+Edit `sign.json` and set `certificate`, `password`, and `timestampService` to the values needed for your code signing certificate.
+
+To get the path for `signtool`, go to Start -> All Programs -> Visual Studio 2013 -> Visual Studio Tools -> Developer Command Prompt for VS2013 and run the command `where signtool.exe`.
+
+
+## Building the Ygor application
 
 To clean everything:
 
@@ -197,18 +206,4 @@ npm start
 cd $HOME\ygor\desktop
 npm run release
 ```
-
-## Code signing
-
-Start Menu -> All Programs -> Visual Studio 2013 -> Visual Studio Tools -> Developer Command Prompt for VS2013
-
-
-```batch
-cd \ygor\desktop\releases
-signtool verify /v /pa Ygor_0.1.2.exe
-signtool.exe sign /f umcodesign.pfx /p "password goes here" /t http://timestamp.comodoca.com/authenticode Ygor_0.1.2.exe
-signtool verify /v /pa Ygor_0.1.2.exe
-```
-
-see https://msdn.microsoft.com/en-us/library/8s9b9yaz%28v=vs.110%29.aspx
 
