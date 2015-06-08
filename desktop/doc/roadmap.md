@@ -2,18 +2,10 @@
 
 ## Short-term
 
-  * codesign Windows installer, binaries
   * Get auto-update working on Mac
     * https://github.com/atom/electron/blob/master/docs/api/auto-updater.md
     * post to stackoverflow about gulp-vinyl-zip problem: https://stackoverflow.com/questions/30521106/typeerror-when-creating-zip-file-with-gulp-vinyl-zip
   * Get auto-update working on Windows
-    * codesign
-      * To sign installer, see http://nsis.sourceforge.net/Run_Command_After_Compilation
-
-      * Signing and checking code with Authenticode: https://msdn.microsoft.com/en-us/library/ms537364%28v=vs.85%29.aspx
-      * https://stackoverflow.com/questions/3580349/code-signing-microsoft-authenticode
-      * http://www.tech-pro.net/code-signing-for-developers.html
-      * http://www.codeproject.com/Articles/325833/Basics-of-Signing-and-Verifying-code
     * There are problems, see https://github.com/atom/electron/issues/939
     * it apparently works under grunt-electron-installer, see
       * https://github.com/atom/electron/issues/1479
