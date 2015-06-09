@@ -80,8 +80,6 @@ var sign = function (filename) {
 
 var signCode = function () {
 
-    var deferred = Q.defer();
-
     // To enable code signing, copy the file resources/osx/sign.example
     // to resources/osx/sign.json and edit it to fill in the correct
     // values for your development environment.
@@ -96,11 +94,11 @@ var signCode = function () {
     var filesToSign = jetpack.find(readyAppDir.cwd(),
         { matching: [ '*.exe', '*.dll' ] });
 
-    var result = Q();
+    var promise = Q();
     filesToSign.forEach(function (f) {
-        result = result.then( function() { return sign(f); } );
+        promise = promise.then( function() { return sign(f); } );
     });
-    return result;
+    return promise;
 
 };
 
