@@ -3,8 +3,8 @@
 var Q = require('q');
 var gulp = require('gulp');
 var gulpUtil = require('gulp-util');
-var shell = require('gulp-shell');
 //var zip = require('gulp-vinyl-zip');
+var childProcess = require('child_process');
 var jetpack = require('fs-jetpack');
 var asar = require('asar');
 var utils = require('./utils');
@@ -14,6 +14,7 @@ var releasesDir;
 var tmpDir;
 var finalAppDir;
 var manifest;
+var signingInfo;
 
 var init = function () {
     projectDir = jetpack;
@@ -63,8 +64,25 @@ var finalize = function () {
     return Q();
 };
 
-var sign = function () {
+var sign = function (filename) {
     var deferred = Q.defer();
+    gulpUtil.log('Signing ' + filename + ' ...');
+
+    var codesign = childProcess.spawn( "codesign",
+        [ "--deep", "--force", "--sign", signingInfo['identity'], filename ],
+        { stdio: 'inherit' }
+    );
+
+    codesign.on('close', function () {
+        gulpUtil.log('File signed!', filename);
+        deferred.resolve();
+    });
+
+    return deferred.promise;
+
+};
+
+var signCode = function () {
 
     // To enable code signing, create a file resources/osx/sign.json
     // containing an item, identity, whose value is the UID of the Apple
@@ -77,13 +95,12 @@ var sign = function () {
     //   "identity": "WXYZAAPQRS"
     // }
 
-    var signingInfo = projectDir.read('resources/osx/sign.json', 'json');
+    signingInfo = projectDir.read('resources/osx/sign.json', 'json');
     if (! signingInfo) {
         gulpUtil.log('Skipping code signing (file resources/osx/sign.json does not exist)');
         return Q();
     }
-    var identity = signingInfo['identity'];
-    gulpUtil.log('Signing code using identity \'' + identity + '\'...');
+    gulpUtil.log('Signing code using identity \'' + signingInfo['identity'] + '\'...');
 
     var frameworks = [
         'Electron Framework.framework',
@@ -95,33 +112,19 @@ var sign = function () {
         'Mantle.framework'
     ];
 
-    var stream = gulp.src('');
+    var promise = Q();
     frameworks.forEach(function (f) {
-        stream = stream.pipe(shell([
-            'codesign --deep --force --sign <%= identity %> <%= filename %>'
-            ], {
-              templateData: {
-                  identity: "'" + identity + "'",
-                  filename: "'" + finalAppDir.path('Contents/Frameworks/' + f) + "'"
-              }
-            }));
+        promise = promise.then( function() {
+            return sign(finalAppDir.path('Contents/Frameworks/' + f));
+        });
     });
 
-    stream = stream.pipe(shell([
-        'codesign --force --sign <%= identity %> <%= filename %>'
-        ], {
-          templateData: {
-              identity: "'" + identity + "'",
-              filename: "'" + finalAppDir.cwd() + "'"
-          }
-        }));
-
-    stream.on('finish', function() {
-        gulpUtil.log('Done signing code');
-        deferred.resolve();
+    // Sign the whole app
+    promise = promise.then( function() {
+        return sign(finalAppDir.cwd());
     });
 
-    return deferred.promise;
+    return promise;
 
 };
 
@@ -140,19 +143,12 @@ var packToZipFile = function () {
     // Ugly hack until we can get the above to work (with symlinks being
     // stored correctly too):
 
-    var stream = gulp.src('');
-    stream = stream.pipe(shell([
-        'zip -y -r <%= output %> <%= input %>'
-        ], {
-          quiet: true,
-          cwd: tmpDir.cwd(),
-          templateData: {
-              output: "'" + releasesDir.path(zipName) + "'",
-              input: "'" + manifest.productName + ".app'"
-          }
-        }));
-
-    stream.on('finish', function() {
+    var zip = childProcess.spawn( 'zip',
+        [ "-q", "-y", "-r", releasesDir.path(zipName),
+            manifest.productName + ".app" ],
+        { cwd: tmpDir.cwd(), stdio: 'inherit' }
+    );
+    zip.on('close', function () {
         gulpUtil.log('.zip file ready!', releasesDir.path(zipName));
         deferred.resolve();
     });
@@ -207,7 +203,7 @@ module.exports = function () {
     .then(copyRuntime)
     .then(packageBuiltApp)
     .then(finalize)
-    .then(sign)
+    .then(signCode)
 //    .then(packToZipFile)
 //    .then(packToDmgFile)
     .then(function () { return Q.all([ packToZipFile(), packToDmgFile() ]); })
