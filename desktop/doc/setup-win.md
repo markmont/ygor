@@ -145,8 +145,8 @@ Open a PowerShell (not `cmd`, not `command`, not Git `bash`) window:
 
 ```powershell
 cd $HOME
-mkdir electron-build-test
-cd electron-build-test
+mkdir electron-build
+cd electron-build
 git clone https://github.com/atom/electron.git
 cd electron
 python script\bootstrap.py -v --target_arch=x64

@@ -9,7 +9,16 @@
     * There are problems, see https://github.com/atom/electron/issues/939
     * it apparently works under grunt-electron-installer, see
       * https://github.com/atom/electron/issues/1479
+      * https://github.com/atom/electron/issues/939
+      * https://github.com/atom/electron/issues/1008
+      * https://github.com/Squirrel/Squirrel.Windows/
       * https://github.com/atom/grunt-electron-installer
+      * https://github.com/nuget/home
+
+    * Atom
+      * https://github.com/atom/atom
+      * Shortcut target: C:\Users\markmont\AppData\Local\atom\update.exe --processStart atom.exe
+      * Start in: C:\Users\markmont\AppData\Local\atom\..\atom\app-0.207.0
 
   * Mac packaging
     https://github.com/atom/electron/blob/master/docs/tutorial/application-distribution.md
