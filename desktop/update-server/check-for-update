@@ -30,6 +30,7 @@ sub fatal_error {
 my $q = CGI->new;
 
 my $version = $q->param('version') || 'unknown';
+$version =~ s/\/RELEASES$//;  # work around bug in Squirrel.Windows
 if ( $version !~ /^((\d*\.?)+(-[0-9A-Za-z\.\-]+)?)(\+[0-9A-Za-z\.\-]+)?$/ ) {
     fatal_error( "Bad version" );
 }
@@ -40,9 +41,9 @@ if ( $version !~ /^(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z\.\-]+)?/ ) {
 my %version_info = ( 'major' => $1, 'minor' => $2, 'patch' => $3, 'other' => $4 || '' );
 
 my $platform = $q->param('platform') || 'unknown';
-$platform =~ /^([a-z]+)$/;
+$platform =~ /^([a-z0-9]+)$/;
 $platform = $1 || 'unknown'; # untaint
-if ( $platform ne 'darwin' ) {
+if ( $platform ne 'darwin' && $platform ne 'win32' ) {
     fatal_error( "Bad platform" );
 }
 
@@ -50,13 +51,14 @@ my $updates_dir = "/var/www/miflux.lsa.umich.edu/html-ssl/${platform}/updates";
 if ( ! opendir( DIR, $updates_dir ) ) {
     fatal_error( "Bad directory: $!" );
 }
-my @upgrades = grep { /^Ygor-.*\.zip$/ } readdir( DIR );
+my @upgrades = grep { /^Ygor-/ } readdir( DIR );
 closedir( DIR );
 
 my $latest_version = '0.0.0';
+my $latest_version_file = '';
 my %latest = ( 'major' => 0, 'minor' => 0, 'patch' => 0, 'other' => '' );
 for my $u (@upgrades) {
-    next unless $u =~ /^Ygor-(.+)\.zip$/;
+    next unless $u =~ /^Ygor-(.+)\.zip$/ || $u =~ /^Ygor-(.+)-full\.nupkg$/;
     my $v = $1;
     next unless $v =~ /^(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z\.\-]+)?$/;
     my %upgrade = ( 'major' => $1, 'minor' => $2, 'patch' => $3, 'other' => $4 || '' );
@@ -66,6 +68,7 @@ for my $u (@upgrades) {
         || ($upgrade{'major'} == $latest{'major'} && $upgrade{'minor'} == $latest{'minor'} && $upgrade{'patch'} == $latest{'patch'} && $upgrade{'other'} gt $latest{'other'})
     ) {
         $latest_version = $v;
+        $latest_version_file = $u;
         %latest = %upgrade;
    }
 }
@@ -82,7 +85,7 @@ if ( $latest{'major'} > $version_info{'major'}
     my $date = strftime '%Y-%m-%d', localtime;
     # TODO: get name,notes,pub_date from a metadata file (.json or .yaml)
     print <<__END__
-{"url":"https://miflux.lsa.umich.edu/${platform}/updates/Ygor-${latest_version}.zip","name":"Ygor ${latest_version}","notes":"Ygor ${latest_version} is now available","pub_date":"${date}T00:00:00+00:00","version":"${latest_version}"}
+{"url":"https://miflux.lsa.umich.edu/${platform}/updates/${latest_version_file}","name":"Ygor ${latest_version}","notes":"Ygor ${latest_version} is now available","pub_date":"${date}T00:00:00+00:00","version":"${latest_version}"}
 __END__
 ;
     exit( 0 );
