@@ -119,11 +119,11 @@ Currently, we're using a prebuilt release of io.js, but will switch to compiling
 
 ```bash
 cd ${TOOLCHAIN}/src
-wget https://iojs.org/dist/v1.6.3/iojs-v1.6.3-darwin-x64.tar.gz
+wget https://iojs.org/dist/v2.2.1/iojs-v2.2.1-darwin-x64.tar.gz
 cd ..
-tar zxf src/iojs-v1.6.3-darwin-x64.tar.gz
-cp -a iojs-v1.6.3-darwin-x64/{bin,include,lib,share} .
-rm -rf iojs-v1.6.3-darwin-x64
+tar zxf src/iojs-v2.2.1-darwin-x64.tar.gz
+cp -a iojs-v2.2.1-darwin-x64/{bin,include,lib,share} .
+rm -rf iojs-v2.2.1-darwin-x64
 ```
 
 

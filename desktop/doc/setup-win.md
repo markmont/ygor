@@ -110,7 +110,7 @@ https://github.com/atom/node/blob/atom-iojs/src/node_version.h
 Currently, we're using a prebuilt release of io.js, but will switch to compiling from source if/when there is an advantage to doing so.
 
 Download and run the installer from
-https://iojs.org/dist/v1.6.3/iojs-v1.6.3-x64.msi
+https://iojs.org/dist/v2.2.1/iojs-v2.2.1-x64.msi
 
   * make sure it is the "-x64" installer, not the "-x86" one.
 
@@ -190,6 +190,7 @@ To install dependencies after cloning or cleaning:
 
 ```powershell
 cd $HOME\ygor\desktop
+npm install is-property # work around https://github.com/mafintosh/electron-prebuilt/issues/40
 npm install
 ```
 
