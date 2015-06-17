@@ -88,7 +88,7 @@ module.exports.handleStartupEvent = function () {
         }
 
     //setInterval(checkForUpdate, 1000 * 60 * 60 * 4);
-    checkForUpdate();
+    //checkForUpdate();
     return;
 
 };
