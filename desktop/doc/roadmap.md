@@ -6,14 +6,15 @@
     * https://github.com/atom/electron/blob/master/docs/api/auto-updater.md
     * post to stackoverflow about gulp-vinyl-zip problem: https://stackoverflow.com/questions/30521106/typeerror-when-creating-zip-file-with-gulp-vinyl-zip
   * Get auto-update working on Windows
-    * There are problems, see https://github.com/atom/electron/issues/939
-    * it apparently works under grunt-electron-installer, see
-      * https://github.com/atom/electron/issues/1479
-      * https://github.com/atom/electron/issues/939
-      * https://github.com/atom/electron/issues/1008
-      * https://github.com/Squirrel/Squirrel.Windows/
-      * https://github.com/atom/grunt-electron-installer
-      * https://github.com/nuget/home
+    * add periodic auto-update check
+    * Investigate: AppData/Local/Ygor/app-0.1.2 is not being removed on uninstall
+    * https://github.com/atom/electron/issues/939
+    * https://github.com/atom/electron/issues/1008
+    * https://github.com/atom/electron/issues/1479
+    * https://github.com/Squirrel/Squirrel.Windows/
+    * https://github.com/atom/grunt-electron-installer
+    * https://github.com/nuget/home
+    * https://docs.nuget.org/create/nuspec-reference
 
     * Atom
       * https://github.com/atom/atom
