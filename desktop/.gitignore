@@ -4,5 +4,6 @@ node_modules
 releases
 resources/osx/sign.json
 resources/windows/sign.json
+resources/windows/squirrel/SquirrelSetup.log
 tmp
 toolchain
