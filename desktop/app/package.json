@@ -1,7 +1,7 @@
 {
   "name": "Ygor",
   "productName": "Ygor",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "identifier": "edu.umich.Ygor",
   "description": "Ygor research assistant for HPC clusters.",
   "main": "main.js",
@@ -23,6 +23,7 @@
   "author": "University of Michigan",
   "license": "GPL3",
   "dependencies": {
+    "q": "^1.0.1",
     "fs-jetpack": "^0.6.4",
     "jquery": "^2.1.4",
     "jquery-ui": "^1.10.5",

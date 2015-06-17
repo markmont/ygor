@@ -7,9 +7,10 @@ var ipc = require('ipc');
 var env = require('./vendor/electron_boilerplate/env_config');
 var devHelper = require('./vendor/electron_boilerplate/dev_helper');
 var windowStateKeeper = require('./vendor/electron_boilerplate/window_state');
+var squirrelUpdate = require('./vendor/electron_boilerplate/squirrel_update');
 
 // Report crashes to our server.
-require('crash-reporter').start();
+//require('crash-reporter').start();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is GCed.
@@ -25,6 +26,11 @@ var mainWindowState = windowStateKeeper('main', {
 // console.log(env.name);
 
 app.on('ready', function () {
+
+    // This needs to be done first and ASAP:
+    if (squirrelUpdate.handleStartupEvent()) {
+       return;
+    }
 
     mainWindow = new BrowserWindow({
         show: false,
@@ -116,4 +122,5 @@ app.on('window-all-closed', function () {
         app.quit();
     } */
 });
+
 

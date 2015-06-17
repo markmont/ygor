@@ -12,7 +12,7 @@ var tmpDir;
 var releasesDir;
 var readyAppDir;
 var manifest;
-var finalPackageName;
+var nugetPackageName;
 var signingInfo;
 
 var init = function () {
@@ -42,12 +42,18 @@ var packageBuiltApp = function () {
 var finalize = function () {
     var deferred = Q.defer();
 
-    projectDir.copy('resources/windows/icon.ico', readyAppDir.path('icon.ico'));
+    projectDir.copy('resources/windows/squirrel/Update.exe', readyAppDir.path('Update.exe'));
+    readyAppDir.rename('electron.exe', manifest.name + '.exe');
 
+    // TODO: should nuget do this for us?
     // Replace Electron icon for your own.
     var rcedit = require('rcedit');
-    rcedit(readyAppDir.path('electron.exe'), {
-        icon: projectDir.path('resources/windows/icon.ico')
+    rcedit(readyAppDir.path(manifest.name + '.exe'), {
+        'icon': projectDir.path('resources/windows/icon.ico'),
+        'version-string': {
+            'ProductName': manifest.productName,
+            'FileDescription': manifest.description,
+        }
     }, function (err) {
         if (!err) {
             deferred.resolve();
@@ -105,53 +111,70 @@ var signCode = function () {
 var createInstaller = function () {
     var deferred = Q.defer();
 
-    finalPackageName = manifest.name + '-' + manifest.version + '.exe';
+    nugetPackageName = manifest.name + '.' + manifest.version + '.nupkg';
 
-    var signCmd = "echo Not signing the uninstaller";
-    if (signingInfo) {
-        signCmd = "$\\\"" + signingInfo['signtool']
-	    + "$\\\" sign /f $\\\"" + signingInfo['certificate']
-	    + "$\\\" /p $\\\"" + signingInfo['password']
-	    + "$\\\" /t $\\\"" + signingInfo['timestampService']
-	    + "$\\\"";
-    }
-    gulpUtil.log('uninstaller sign: ' + signCmd);
-
-    var installScript = projectDir.read('resources/windows/installer.nsi');
-    installScript = utils.replace(installScript, {
+    var nuspec = projectDir.read('resources/windows/template.nuspec');
+    nuspec = utils.replace(nuspec, {
         name: manifest.name,
-        productName: manifest.productName,
-        version: manifest.version,
-        src: readyAppDir.path(),
-        dest: releasesDir.path(finalPackageName),
-        icon: readyAppDir.path('icon.ico'),
-        setupIcon: projectDir.path('resources/windows/setup-icon.ico'),
-        banner: projectDir.path('resources/windows/setup-banner.bmp'),
-        tmpDir: tmpDir.path(),
-	signCmd: signCmd,
+	title: manifest.productName ? manifest.productName : manifest.name,
+        version: manifest.version.replace(/-.*$/, ''),
+	authors: manifest.author ? manifest.author : '',
+        setupIcon: 'file://' + projectDir.path('resources/windows/setup-icon.ico'),
+	description: manifest.description ? manifest.description : '',
+	exe: manifest.name + '.exe',
     });
-    tmpDir.write('installer.nsi', installScript);
+    var nuspecFile = manifest.name + '.nuspec';
+    tmpDir.write(nuspecFile, nuspec);
 
-    gulpUtil.log('Building installer with NSIS...');
+    gulpUtil.log('Building installer with Nuget...');
 
     // Remove destination file if already exists.
-    releasesDir.remove(finalPackageName);
+    releasesDir.remove(nugetPackageName);
 
-    // Note: NSIS have to be added to PATH (environment variables).
-    var nsis = childProcess.spawn('makensis', [
-        tmpDir.path('installer.nsi')
+    var nuget = childProcess.spawn(
+        projectDir.path('resources/windows/squirrel/nuget.exe'), [
+          'pack', tmpDir.path(nuspecFile),
+          '-BasePath', readyAppDir.cwd(),
+          '-OutputDirectory', tmpDir.cwd(),
+          '-NoDefaultExcludes'
     ], {
         stdio: 'inherit'
     });
-    nsis.on('close', function () {
-        gulpUtil.log('Installer ready!', releasesDir.path(finalPackageName));
+    nuget.on('close', function () {
+        gulpUtil.log('Nuget done!', nugetPackageName);
         deferred.resolve();
     });
 
     return deferred.promise;
 };
 
+var updateInstaller = function () {
+    var deferred = Q.defer();
+
+    gulpUtil.log('Updating installer...');
+
+    var update = childProcess.spawn(
+        projectDir.path('resources/windows/squirrel/Update.com'), [
+          '--releasify', tmpDir.path(nugetPackageName),
+          '--releaseDir', releasesDir.cwd(),
+          '--loadingGif', projectDir.path('resources/windows/install-spinner.gif'),
+          '--setupIcon', projectDir.path('resources/windows/setup-icon.ico'),
+    ], {
+        stdio: 'inherit'
+    });
+    update.on('close', function () {
+        gulpUtil.log('update done!');
+        deferred.resolve();
+    });
+
+
+    return deferred.promise;
+};
+
 var signInstaller = function () {
+    var finalPackageName = manifest.name + '-' + manifest.version
+        + '-' + 'Setup.exe';
+    releasesDir.rename('Setup.exe', finalPackageName);
     if (!signingInfo) {
         return Q();
     }
@@ -169,6 +192,8 @@ module.exports = function () {
     .then(finalize)
     .then(signCode)
     .then(createInstaller)
+    // TODO: run SyncReleases.exe -u $URL -r releasesDir.cwd()
+    .then(updateInstaller)
     .then(signInstaller)
     .then(cleanClutter);
 };
