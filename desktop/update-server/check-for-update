@@ -47,7 +47,7 @@ if ( $platform ne 'darwin' && $platform ne 'win32' ) {
     fatal_error( "Bad platform" );
 }
 
-my $updates_dir = "/var/www/miflux.lsa.umich.edu/html-ssl/${platform}/updates";
+my $updates_dir = "/var/www/ygor.lsa.umich.edu/html-ssl/${platform}/updates";
 if ( ! opendir( DIR, $updates_dir ) ) {
     fatal_error( "Bad directory: $!" );
 }
@@ -85,7 +85,7 @@ if ( $latest{'major'} > $version_info{'major'}
     my $date = strftime '%Y-%m-%d', localtime;
     # TODO: get name,notes,pub_date from a metadata file (.json or .yaml)
     print <<__END__
-{"url":"https://miflux.lsa.umich.edu/${platform}/updates/${latest_version_file}","name":"Ygor ${latest_version}","notes":"Ygor ${latest_version} is now available","pub_date":"${date}T00:00:00+00:00","version":"${latest_version}"}
+{"url":"https://ygor.lsa.umich.edu/${platform}/updates/${latest_version_file}","name":"Ygor ${latest_version}","notes":"Ygor ${latest_version} is now available","pub_date":"${date}T00:00:00+00:00","version":"${latest_version}"}
 __END__
 ;
     exit( 0 );

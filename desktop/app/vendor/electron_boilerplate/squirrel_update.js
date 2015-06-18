@@ -45,7 +45,7 @@ var checkForUpdate = function () {
         return;
     }
     console.log("Checking for updates...");
-    runUpdate(['--update', 'https://miflux.lsa.umich.edu/win32/updates'])
+    runUpdate(['--update', 'https://ygor.lsa.umich.edu/win32/updates'])
         .done();
     return;
 };

@@ -64,17 +64,19 @@ var finalize = function () {
     return Q();
 };
 
-var sign = function (filename) {
+var sign = function (filename, deep) {
     var deferred = Q.defer();
-    gulpUtil.log('Signing ' + filename + ' ...');
+    gulpUtil.log('Signing ' + filename);
 
-    var codesign = childProcess.spawn( "codesign",
-        [ "--deep", "--force", "--sign", signingInfo['identity'], filename ],
-        { stdio: 'inherit' }
-    );
+    var args = [ "--force", "--sign", signingInfo['identity'], filename ];
+    if ( deep ) {
+        args.unshift("--deep");
+    }
+
+    var codesign = childProcess.spawn("codesign", args, { stdio: 'inherit' });
 
     codesign.on('close', function () {
-        gulpUtil.log('File signed!', filename);
+        //gulpUtil.log('File signed!', filename);
         deferred.resolve();
     });
 
@@ -115,13 +117,13 @@ var signCode = function () {
     var promise = Q();
     frameworks.forEach(function (f) {
         promise = promise.then( function() {
-            return sign(finalAppDir.path('Contents/Frameworks/' + f));
+            return sign(finalAppDir.path('Contents/Frameworks/' + f), true);
         });
     });
 
     // Sign the whole app
     promise = promise.then( function() {
-        return sign(finalAppDir.cwd());
+        return sign(finalAppDir.cwd(), false);
     });
 
     return promise;
