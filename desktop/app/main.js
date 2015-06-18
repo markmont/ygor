@@ -63,7 +63,8 @@ app.on('ready', function () {
         mainWindow.focus();
         if (env.name !== 'development') {
             console.log('Setting update URL...');
-            autoUpdater.setFeedUrl('https://miflux.lsa.umich.edu/cgi-bin/check-for-update?platform=' + process.platform + '&version=' + app.getVersion());
+            //autoUpdater.setFeedUrl('https://miflux.lsa.umich.edu/cgi-bin/check-for-update?platform=' + process.platform + '&version=' + app.getVersion());
+            autoUpdater.setFeedUrl('https://miflux.lsa.umich.edu/' + process.platform + "/updates/latest-version.json");
             // TODO: schedule a periodic check, say, every 4 hours
             autoUpdater.checkForUpdates();
         }
