@@ -52,7 +52,8 @@ var finalize = function () {
         'icon': projectDir.path('resources/windows/icon.ico'),
         'version-string': {
             'ProductName': manifest.productName,
-            'FileDescription': manifest.description,
+            //'FileDescription': manifest.description,
+            'FileDescription': manifest.productName, // used for Mac menu name in VMWare Fusion's Unity mode
         }
     }, function (err) {
         if (!err) {
