@@ -194,3 +194,21 @@ chcon -t httpd_sys_content_t Ygor-*
 ```
 
 Note that the auto-updater depends on a CGI script, `update-server/check-for-update`.  This is installed at `/var/www/miflux.lsa.umich.edu/cgi-bin-ssl/check-for-update`.
+
+## Cleaning up
+
+To remove all traces of Ygor from a system, first uninstall the application.  Then run:
+
+```bash
+rm -rf \
+  ~/Library/"Application Support"/edu.umich.Ygor.ShipIt \
+  ~/Library/"Application Support"/Ygor \
+  ~/Library/Caches/edu.umich.Ygor \
+  ~/Library/Caches/Ygor \
+  ~/Library/"Saved Application State"/edu.umich.Ygor.savedState \
+  ~/Library/"Application Support/Ygor Dev" \
+  ~/Library/Caches/"Ygor Dev"
+```
+
+This may be necessary in order to remove cached results that Squirrel has saved, in order to force Squirrel to check for a new update.
+
