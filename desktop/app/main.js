@@ -63,8 +63,7 @@ app.on('ready', function () {
         mainWindow.focus();
         if (env.name !== 'development') {
             console.log('Setting update URL...');
-            //autoUpdater.setFeedUrl('https://ygor.lsa.umich.edu/cgi-bin/check-for-update?platform=' + process.platform + '&version=' + app.getVersion());
-            autoUpdater.setFeedUrl('https://ygor.lsa.umich.edu/' + process.platform + "/updates/latest-version.json");
+            autoUpdater.setFeedUrl('https://ygor.lsa.umich.edu/cgi-bin/check-for-update?platform=' + process.platform + '&version=' + app.getVersion());
             // TODO: schedule a periodic check, say, every 4 hours
             autoUpdater.checkForUpdates();
         }
